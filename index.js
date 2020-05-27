@@ -23,6 +23,7 @@ const getTour = (req, res) => {
 
   JSend.success(res, 200, tour, 'tour');
 };
+
 const createTour = (req, res) => {
   const newId = tours[tours.length - 1].id + 1;
   const newTour = Object.assign({ id: newId }, req.body);
@@ -36,6 +37,7 @@ const createTour = (req, res) => {
     }
   );
 };
+
 const updateTour = (req, res) => {
   const tourId = req.params.id * 1;
   const tour = tours.find(({ id }) => id === tourId);
@@ -45,6 +47,7 @@ const updateTour = (req, res) => {
 
   JSend.success(res, 200, '<Updated tour here>', 'tour');
 };
+
 const deleteTour = (req, res) => {
   const tourId = req.params.id * 1;
   const tour = tours.find(({ id }) => id === tourId);
@@ -55,11 +58,18 @@ const deleteTour = (req, res) => {
   JSend.success(res, 204);
 };
 
-app.get('/api/v1/tours', getAllTours);
-app.get('/api/v1/tours/:id', getTour);
-app.post('/api/v1/tours', createTour);
-app.patch('/api/v1/tours/:id', updateTour);
-app.delete('/api/v1/tours/:id', deleteTour);
+// app.get('/api/v1/tours', getAllTours);
+// app.get('/api/v1/tours/:id', getTour);
+// app.post('/api/v1/tours', createTour);
+// app.patch('/api/v1/tours/:id', updateTour);
+// app.delete('/api/v1/tours/:id', deleteTour);
+
+app.route('/api/v1/tours').get(getAllTours).post(createTour);
+app
+  .route('/api/v1/tours/:id')
+  .get(getTour)
+  .patch(updateTour)
+  .delete(deleteTour);
 
 const port = process.env.PORT || 8000;
 app.listen(port, '127.0.0.1', () => debug(`Listening on port ${port}...`));
