@@ -1,6 +1,10 @@
 const sendRes = {
   success: (res, code, data, dataKey) => {
-    const result = data.length;
+    let results;
+    if (typeof data === 'object') {
+      results = data.length;
+    }
+    console.log(results);
 
     let status = 'success';
 
@@ -12,7 +16,7 @@ const sendRes = {
 
     return res.status(code).json({
       status,
-      result,
+      results,
       data: {
         [dataKey]: data,
       },
@@ -23,7 +27,7 @@ const sendRes = {
     let status = '';
 
     if (code >= 400 && code < 500) {
-      status = 'failed';
+      status = 'fail';
     } else if (code >= 500 && code < 600) {
       status = 'error';
     }
