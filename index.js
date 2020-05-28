@@ -33,7 +33,6 @@ const getAllTours = (req, res) => {
 
   JSend.success(res, 200, tours, 'tours');
 };
-
 const getTour = (req, res) => {
   const tourId = req.params.id * 1;
   const tour = tours.find(({ id }) => id === tourId);
@@ -43,7 +42,6 @@ const getTour = (req, res) => {
 
   JSend.success(res, 200, tour, 'tour');
 };
-
 const createTour = (req, res) => {
   const newId = tours[tours.length - 1].id + 1;
   const newTour = Object.assign({ id: newId }, req.body);
@@ -57,7 +55,6 @@ const createTour = (req, res) => {
     }
   );
 };
-
 const updateTour = (req, res) => {
   const tourId = req.params.id * 1;
   const tour = tours.find(({ id }) => id === tourId);
@@ -67,7 +64,6 @@ const updateTour = (req, res) => {
 
   JSend.success(res, 200, '<Updated tour here>', 'tour');
 };
-
 const deleteTour = (req, res) => {
   const tourId = req.params.id * 1;
   const tour = tours.find(({ id }) => id === tourId);
@@ -76,6 +72,22 @@ const deleteTour = (req, res) => {
   }
 
   JSend.success(res, 204);
+};
+
+const getAllUsers = (_req, res) => {
+  JSend.error(res, 500, 'This route is not yet defined!');
+};
+const getUser = (_req, res) => {
+  JSend.error(res, 500, 'This route is not yet defined!');
+};
+const createUser = (_req, res) => {
+  JSend.error(res, 500, 'This route is not yet defined!');
+};
+const updateUser = (_req, res) => {
+  JSend.error(res, 500, 'This route is not yet defined!');
+};
+const deleteUser = (_req, res) => {
+  JSend.error(res, 500, 'This route is not yet defined!');
 };
 
 // ROUTES
@@ -93,6 +105,13 @@ app
   .get(getTour)
   .patch(updateTour)
   .delete(deleteTour);
+
+app.route('/api/v1/users').get(getAllUsers).post(createUser);
+app
+  .route('/api/v1/users/:id')
+  .get(getUser)
+  .patch(updateUser)
+  .delete(deleteUser);
 
 // STARTS the SERVER
 
