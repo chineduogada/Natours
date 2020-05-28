@@ -4,7 +4,6 @@ const sendRes = {
     if (typeof data === 'object') {
       results = data.length;
     }
-    console.log(results);
 
     let status = 'success';
 

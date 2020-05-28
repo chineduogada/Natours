@@ -3,14 +3,34 @@ const { sendRes: JSend } = require('./utils');
 const express = require('express');
 const app = express();
 const fs = require('fs');
+const morgan = require('morgan');
+
+// MIDDLEWARES
+
+app.use(morgan('dev'));
 
 app.use(express.json());
+
+app.use((req, res, next) => {
+  debug('Hello from the middleware.');
+
+  next();
+});
+
+app.use((req, res, next) => {
+  req.requestTime = new Date().toDateString();
+  next();
+});
 
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`, 'utf-8')
 );
 
-const getAllTours = (_req, res) => {
+// ROUTE HANDLERS
+
+const getAllTours = (req, res) => {
+  debug(req.requestTime);
+
   JSend.success(res, 200, tours, 'tours');
 };
 
@@ -58,6 +78,8 @@ const deleteTour = (req, res) => {
   JSend.success(res, 204);
 };
 
+// ROUTES
+
 // app.get('/api/v1/tours', getAllTours);
 // app.get('/api/v1/tours/:id', getTour);
 // app.post('/api/v1/tours', createTour);
@@ -65,11 +87,14 @@ const deleteTour = (req, res) => {
 // app.delete('/api/v1/tours/:id', deleteTour);
 
 app.route('/api/v1/tours').get(getAllTours).post(createTour);
+
 app
   .route('/api/v1/tours/:id')
   .get(getTour)
   .patch(updateTour)
   .delete(deleteTour);
+
+// STARTS the SERVER
 
 const port = process.env.PORT || 8000;
 app.listen(port, '127.0.0.1', () => debug(`Listening on port ${port}...`));
