@@ -4,7 +4,8 @@
   "description": "learning express and mongodb",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js"
+    "start:dev": "SET NODE_ENV=development && nodemon server.js",
+    "start:prod": "SET NODE_ENV=production && nodemon server.js"
   },
   "author": "stanley chinedu ogada",
   "license": "ISC",
@@ -15,6 +16,7 @@
     "helmet": "^3.22.0",
     "joi": "^13.1.0",
     "mongoose": "^5.0.1",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "dotenv": "^7.0.0"
   }
 }
