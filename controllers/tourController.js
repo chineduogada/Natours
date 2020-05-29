@@ -1,3 +1,4 @@
+const Joi = require('joi');
 const debug = require('debug')('app:startup');
 const { sendRes: JSend } = require('../utils');
 const fs = require('fs');
@@ -13,6 +14,26 @@ exports.checkID = (req, res, next, val) => {
   const tour = tours.find(({ id }) => id === tourId);
   if (!tour) {
     return JSend.error(res, 404, 'invalid ID');
+  }
+
+  next();
+};
+
+exports.checkBody = (req, res, next) => {
+  const schema = {
+    name: Joi.string().required(),
+    price: Joi.number().required(),
+  };
+
+  const body = {
+    name: req.body.name,
+    price: req.body.price,
+  };
+
+  const { error } = Joi.validate(body, schema);
+
+  if (error) {
+    return JSend.error(res, 400, error.details[0].message);
   }
 
   next();
