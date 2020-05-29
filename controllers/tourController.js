@@ -6,6 +6,18 @@ const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`, 'utf-8')
 );
 
+exports.checkID = (req, res, next, val) => {
+  debug(`Tour id is: ${val}`);
+
+  const tourId = req.params.id * 1;
+  const tour = tours.find(({ id }) => id === tourId);
+  if (!tour) {
+    return JSend.error(res, 404, 'invalid ID');
+  }
+
+  next();
+};
+
 exports.getAllTours = (req, res) => {
   debug(req.requestTime);
 
@@ -15,9 +27,6 @@ exports.getAllTours = (req, res) => {
 exports.getTour = (req, res) => {
   const tourId = req.params.id * 1;
   const tour = tours.find(({ id }) => id === tourId);
-  if (!tour) {
-    return JSend.error(res, 404, 'invalid ID');
-  }
 
   JSend.success(res, 200, tour, 'tour');
 };
@@ -37,21 +46,9 @@ exports.createTour = (req, res) => {
 };
 
 exports.updateTour = (req, res) => {
-  const tourId = req.params.id * 1;
-  const tour = tours.find(({ id }) => id === tourId);
-  if (!tour) {
-    return JSend.error(res, 404, 'invalid ID');
-  }
-
   JSend.success(res, 200, '<Updated tour here>', 'tour');
 };
 
 exports.deleteTour = (req, res) => {
-  const tourId = req.params.id * 1;
-  const tour = tours.find(({ id }) => id === tourId);
-  if (!tour) {
-    return JSend.error(res, 404, 'invalid ID');
-  }
-
   JSend.success(res, 204);
 };

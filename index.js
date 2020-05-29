@@ -1,13 +1,13 @@
 const debug = require('debug')('app:startup');
 const express = require('express');
-const app = express();
 const morgan = require('morgan');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
 // MIDDLEWARES
-app.use(morgan('dev'));
+const app = express();
 
+app.use(morgan('dev'));
 app.use(express.json());
 
 app.use((_req, _res, next) => {
@@ -15,6 +15,7 @@ app.use((_req, _res, next) => {
 
   next();
 });
+
 app.use((req, _res, next) => {
   req.requestTime = new Date().toDateString();
   next();
