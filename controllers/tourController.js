@@ -5,15 +5,33 @@ const { sendRes: JSend } = require('../utils');
 // MODEL
 const TourModel = require('./../models/tourModel');
 
-// CONTROLLERS
-exports.getAllTours = (req, res) => {
-  debug(req.requestTime);
-
-  JSend.success(res, 201, '<get all tours here>', 'tour');
+// MIDDLEWARES
+exports.addIdToReq = (req, _res, next, value) => {
+  req.id = value;
+  next();
 };
 
-exports.getTour = (req, res) => {
-  JSend.success(res, 201, '<get tour here>', 'tour');
+// CONTROLLERS
+exports.getAllTours = async (_req, res) => {
+  try {
+    const tours = await TourModel.find().sort('name');
+    JSend.success(res, 200, tours, 'tours');
+  } catch (ex) {
+    JSend.error(res, 404, ex.message);
+  }
+};
+
+exports.getTour = async (req, res) => {
+  try {
+    const { id } = req;
+
+    // const tour = await TourModel.findOne({ _id: id });
+    const tour = await TourModel.findById(id);
+
+    JSend.success(res, 200, tour, 'tour');
+  } catch (ex) {
+    JSend.error(res, 404, ex.message);
+  }
 };
 
 exports.createTour = async (req, res) => {
@@ -28,10 +46,24 @@ exports.createTour = async (req, res) => {
   }
 };
 
-exports.updateTour = (req, res) => {
-  JSend.success(res, 200, '<Updated tour here>', 'tour');
+exports.updateTour = async (req, res) => {
+  const { id, body } = req;
+
+  try {
+    const tour = await TourModel.findByIdAndUpdate(id, body, { new: true });
+    JSend.success(res, 200, tour, 'tour');
+  } catch (ex) {
+    JSend.error(res, 404, ex.message);
+  }
 };
 
-exports.deleteTour = (req, res) => {
-  JSend.success(res, 204);
+exports.deleteTour = async (req, res) => {
+  const { id } = req;
+
+  try {
+    const tour = await TourModel.findByIdAndRemove(id);
+    JSend.success(res, 204);
+  } catch (ex) {
+    JSend.error(res, 404, ex.message);
+  }
 };
