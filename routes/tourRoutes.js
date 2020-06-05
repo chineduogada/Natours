@@ -1,13 +1,16 @@
 const router = require('express').Router();
 const tourController = require('../controllers/tourController');
 
+// related routes
 // app.get('/api/v1/tours', getAllTours);
-// app.get('/api/v1/tours/:id', getTour);
 // app.post('/api/v1/tours', createTour);
+
+// related routes
+// app.get('/api/v1/tours/:id', getTour);
 // app.patch('/api/v1/tours/:id', updateTour);
 // app.delete('/api/v1/tours/:id', deleteTour);
 
-router.param('id', tourController.checkID);
+// router.param('id', tourController.checkID);
 
 router
   .route('/')

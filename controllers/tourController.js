@@ -1,24 +1,11 @@
 const Joi = require('joi');
 const debug = require('debug')('app:startup');
 const { sendRes: JSend } = require('../utils');
-const fs = require('fs');
 
-const tours = JSON.parse(
-  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`, 'utf-8')
-);
+// MODELS
+const TourModel = require('./../models/tourModel');
 
-exports.checkID = (req, res, next, val) => {
-  debug(`Tour id is: ${val}`);
-
-  const tourId = req.params.id * 1;
-  const tour = tours.find(({ id }) => id === tourId);
-  if (!tour) {
-    return JSend.error(res, 404, 'invalid ID');
-  }
-
-  next();
-};
-
+// VALIDATORS
 exports.checkBody = (req, res, next) => {
   const schema = {
     name: Joi.string().required(),
@@ -39,31 +26,19 @@ exports.checkBody = (req, res, next) => {
   next();
 };
 
+// CONTROLLERS
 exports.getAllTours = (req, res) => {
   debug(req.requestTime);
 
-  JSend.success(res, 200, tours, 'tours');
+  JSend.success(res, 201, '<create all tours here>', 'tour');
 };
 
 exports.getTour = (req, res) => {
-  const tourId = req.params.id * 1;
-  const tour = tours.find(({ id }) => id === tourId);
-
-  JSend.success(res, 200, tour, 'tour');
+  JSend.success(res, 201, '<get tour here>', 'tour');
 };
 
 exports.createTour = (req, res) => {
-  const newId = tours[tours.length - 1].id + 1;
-  const newTour = Object.assign({ id: newId }, req.body);
-
-  tours.push(newTour);
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      JSend.success(res, 201, newTour, 'tour');
-    }
-  );
+  JSend.success(res, 201, '<create tour here>', 'tour');
 };
 
 exports.updateTour = (req, res) => {
