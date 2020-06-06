@@ -8,6 +8,7 @@ module.exports = mongoose.model(
       required: [true, `a tour must have a 'name'`],
       unique: true,
       trim: true,
+      lowercase: true,
     },
     difficulty: {
       type: String,
@@ -35,11 +36,13 @@ module.exports = mongoose.model(
     summary: {
       type: String,
       trim: true,
+      lowercase: true,
       required: [true, `a tour must have a 'summary'`],
     },
     description: {
       type: String,
       trim: true,
+      lowercase: true,
     },
     imageCover: {
       type: String,

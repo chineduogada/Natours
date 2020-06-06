@@ -12,9 +12,26 @@ exports.addIdToReq = (req, _res, next, value) => {
 };
 
 // CONTROLLERS
-exports.getAllTours = async (_req, res) => {
+exports.getAllTours = async (req, res) => {
   try {
-    const tours = await TourModel.find().sort('name');
+    // BUILD QUERY
+    const queryObj = { ...req.query };
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    excludedFields.forEach((field) => delete queryObj[field]);
+
+    const query = TourModel.find(queryObj);
+
+    // const query = await TourModel.find()
+    //   .where('difficulty')
+    //   .equals('easy')
+    //   .where('duration')
+    //   .equals(5)
+    //   .sort('name');
+
+    // EXECUTE QUERY
+    const tours = await query;
+
+    // SEND RESPONSE
     JSend.success(res, 200, tours, 'tours');
   } catch (ex) {
     JSend.error(res, 404, ex.message);
