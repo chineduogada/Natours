@@ -23,11 +23,11 @@ module.exports = mongoose.model(
       type: Number,
       required: [true, `a tour must have a 'duration'`],
     },
-    ratingAverage: {
+    ratingsAverage: {
       type: Number,
       default: 4.5,
     },
-    ratingQuantity: {
+    ratingsQuantity: {
       type: Number,
       default: 0,
     },

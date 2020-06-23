@@ -1,6 +1,6 @@
 // const Joi = require('joi');
 const debug = require('debug')('app:startup');
-const { sendRes: JSend } = require('../utils');
+const { sendRes: JSend, API_Features } = require('../utils');
 
 // MODEL
 const TourModel = require('./../models/tourModel');
@@ -14,22 +14,14 @@ exports.addIdToReq = (req, _res, next, value) => {
 // CONTROLLERS
 exports.getAllTours = async (req, res) => {
   try {
-    // BUILD QUERY
-    const queryObj = { ...req.query };
-    const excludedFields = ['page', 'sort', 'limit', 'fields'];
-    excludedFields.forEach((field) => delete queryObj[field]);
-
-    const query = TourModel.find(queryObj);
-
-    // const query = await TourModel.find()
-    //   .where('difficulty')
-    //   .equals('easy')
-    //   .where('duration')
-    //   .equals(5)
-    //   .sort('name');
+    const apiFeatures = new API_Features(TourModel, req.query)
+      .filter()
+      .sort()
+      .paginate()
+      .project();
 
     // EXECUTE QUERY
-    const tours = await query;
+    const tours = await apiFeatures.query;
 
     // SEND RESPONSE
     JSend.success(res, 200, tours, 'tours');

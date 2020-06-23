@@ -16,6 +16,7 @@ router
   .post(tourController.createTour);
 
 router.param('id', tourController.addIdToReq);
+
 router
   .route('/:id')
   .get(tourController.getTour)
