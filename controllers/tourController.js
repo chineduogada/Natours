@@ -11,6 +11,15 @@ exports.addIdToReq = (req, _res, next, value) => {
   next();
 };
 
+exports.topCheap = (req, res, next) => {
+  req.query.fields = 'name,ratingsAverage,price,duration';
+  req.query.limit = 5;
+  req.query.page = 1;
+  req.query.sort = '-ratingsAverage,price';
+
+  next();
+};
+
 // CONTROLLERS
 exports.getAllTours = async (req, res) => {
   try {
