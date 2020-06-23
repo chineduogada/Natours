@@ -10,8 +10,14 @@ const tourController = require('../controllers/tourController');
 // app.patch('/api/v1/tours/:id', updateTour);
 // app.delete('/api/v1/tours/:id', deleteTour);
 
+// ALIASES
 router.get('/top-cheap', tourController.topCheap, tourController.getAllTours);
 
+// AGGREGATES
+router.get('/stats', tourController.tourStats);
+router.get('/monthly-plan/:year', tourController.monthlyPlan);
+
+// API ROUTES
 router
   .route('/')
   .get(tourController.getAllTours)
