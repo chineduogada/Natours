@@ -3,6 +3,7 @@ const express = require('express');
 const morgan = require('morgan');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const AppError = require('./utils/AppError');
 
 // MIDDLEWARES
 const app = express();
@@ -29,5 +30,28 @@ app.use((req, _res, next) => {
 // ROUTES
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+
+// UNHANDLED ROUTES
+app.all('*', (req, res, next) => {
+  const err = new AppError(
+    `no such 'route: ${req.originalUrl}' on this server`,
+    404
+  );
+
+  next(err);
+});
+
+// GLOBAL ERROR HANDLER
+app.use((err, req, res, next) => {
+  err.status = err.status || 'error';
+  err.statusCode = err.statusCode || '500';
+
+  res.status(err.statusCode).json({
+    status: err.status,
+    message: err.message,
+  });
+
+  next();
+});
 
 module.exports = app;
