@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const AppError = require('./utils/AppError');
+const globalErrController = require('./controllers/errorController');
 
 // MIDDLEWARES
 const app = express();
@@ -42,16 +43,6 @@ app.all('*', (req, res, next) => {
 });
 
 // GLOBAL ERROR HANDLER
-app.use((err, req, res, next) => {
-  err.status = err.status || 'error';
-  err.statusCode = err.statusCode || '500';
-
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-  });
-
-  next();
-});
+app.use(globalErrController);
 
 module.exports = app;

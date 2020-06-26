@@ -9,11 +9,16 @@ module.exports = mongoose.model(
       unique: true,
       trim: true,
       lowercase: true,
+      minlength: [10, `'name' must be equal or more than '10'`],
+      maxlength: [40, `'name' must be equal or less than '40'`],
     },
     difficulty: {
       type: String,
       required: [true, `a tour must have a 'difficulty'`],
-      enum: ['easy', 'medium', 'hard', 'difficult'],
+      enum: {
+        values: ['easy', 'medium', 'difficult'],
+        message: `'difficulty' must be either: 'easy', 'medium', or 'difficult'`,
+      },
     },
     maxGroupSize: {
       type: Number,
@@ -26,15 +31,26 @@ module.exports = mongoose.model(
     ratingsAverage: {
       type: Number,
       default: 4.5,
+      min: [1, `'ratingsAverage' must be equal or more than '1.0'`],
+      max: [5, `'ratingsAverage' must be equal or less than '5.0'`],
     },
     ratingsQuantity: {
       type: Number,
       default: 0,
     },
     price: { type: Number, required: [true, `a tour must have a 'price'`] },
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      validate: {
+        validator: function (val) {
+          return val < this.price;
+        },
+        message: `'priceDiscount':{VALUE} must be less than the regular 'price'`,
+      },
+    },
     summary: {
       type: String,
+      unique: true,
       trim: true,
       lowercase: true,
       required: [true, `a tour must have a 'summary'`],
