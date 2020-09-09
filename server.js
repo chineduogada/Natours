@@ -1,5 +1,4 @@
-const dotenv = require('dotenv');
-dotenv.config({ path: './config.env' });
+require('dotenv').config();
 
 const mongoose = require('mongoose');
 const debug = require('debug')('app:startup');
@@ -32,3 +31,4 @@ process.on('unhandledRejection', (err) => {
   console.error('UNHANDLED REJECTION: Shutting down...');
   server.close(() => process.exit(1));
 });
+

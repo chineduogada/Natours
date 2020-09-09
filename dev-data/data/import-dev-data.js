@@ -46,7 +46,8 @@ if (process.argv[2] === '--import') {
   deleteData();
 } else {
   debug(
-    'please specify either of the flags \n --> "--delete" or "--import"  <--'
+    'please specify either of the flags \n --> "--delete" or "--import" <--'
   );
   process.exit();
 }
+
