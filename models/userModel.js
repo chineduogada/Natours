@@ -43,6 +43,7 @@ const userSchema = new mongoose.Schema({
       message: 'password must match passwordCheck',
     },
   },
+  passwordChangedAt: Date,
 });
 
 // MIDDLEWARES
@@ -74,6 +75,16 @@ userSchema.methods.isPasswordCorrect = async (
   return isCorrect;
 };
 
+userSchema.methods.changedPasswordAfterJWTWasIssued = function (JTWIssuedAt) {
+  if (this.passwordChangedAt) {
+    const passwordChangedAt = parseInt(this.passwordChangedAt.getTime() / 1000);
+
+    return passwordChangedAt > JTWIssuedAt;
+  }
+
+  // False means not Change
+  return false;
+};
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

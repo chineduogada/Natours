@@ -1,14 +1,6 @@
 const router = require('express').Router();
 const tourController = require('../controllers/tourController');
-
-// related routes
-// app.get('/api/v1/tours', getAllTours);
-// app.post('/api/v1/tours', createTour);
-
-// related routes
-// app.get('/api/v1/tours/:id', getTour);
-// app.patch('/api/v1/tours/:id', updateTour);
-// app.delete('/api/v1/tours/:id', deleteTour);
+const authController = require('../controllers/authController');
 
 // ALIASES
 router.get('/top-cheap', tourController.topCheap, tourController.getAllTours);
@@ -20,8 +12,8 @@ router.get('/monthly-plan/:year', tourController.monthlyPlan);
 // API ROUTES
 router
   .route('/')
-  .get(tourController.getAllTours)
-  .post(tourController.createTour);
+  .get(authController.protect, tourController.getAllTours)
+  .post(authController.protect, tourController.createTour);
 
 router.param('id', tourController.addIdToReq);
 
@@ -32,3 +24,4 @@ router
   .delete(tourController.deleteTour);
 
 module.exports = router;
+

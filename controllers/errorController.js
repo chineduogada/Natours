@@ -52,6 +52,14 @@ const handleDuplicationKeyError = (err) => {
   return new AppError(message, 400);
 };
 
+const handleJWTError = () => {
+  return new AppError('Invalid token! please log in again.', 401);
+};
+
+const handleJWTExpiredError = () => {
+  return new AppError('token has expired! please log in again.', 401);
+};
+
 const globalErrController = (err, _req, res, next) => {
   err.status = err.status || 'error';
   err.statusCode = err.statusCode || '500';
@@ -61,9 +69,12 @@ const globalErrController = (err, _req, res, next) => {
   } else {
     let error = { ...err, message: err.message, stack: err.stack };
 
+    if (error.code === 11000) error = handleDuplicationKeyError(error);
     if (error.name === 'CastError') error = handleCastError(error);
     if (error.name === 'ValidationError') error = handleValidationError(error);
-    if (error.code === 11000) error = handleDuplicationKeyError(error);
+    if (error.name === 'JsonWebTokenError') error = handleJWTError(error);
+    if (error.name === 'TokenExpiredError')
+      error = handleJWTExpiredError(error);
 
     sendResProd(error, res);
   }
@@ -72,3 +83,4 @@ const globalErrController = (err, _req, res, next) => {
 };
 
 module.exports = globalErrController;
+
