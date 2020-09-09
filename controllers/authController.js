@@ -16,6 +16,7 @@ exports.signUp = catchAsync(async (req, res) => {
   let newUser = await User.create({
     name: req.body.name,
     email: req.body.email,
+    role: req.body.role,
     password: req.body.password,
     passwordCheck: req.body.passwordCheck,
     passwordChangedAt: req.body.passwordChangedAt,
@@ -123,5 +124,14 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.restrict = catchAsync(async (req, res, next) => {});
+exports.restrictTo = (...roles) => (req, res, next) => {
+  console.log(req.user.role);
+
+  if (!roles.includes(req.user.role)) {
+    const err = new AppError('access denied! unauthorized', 403);
+    return next(err);
+  }
+
+  next();
+};
 

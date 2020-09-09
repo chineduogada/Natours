@@ -105,7 +105,12 @@ exports.deleteTour = catchAsync(async (req, res, next) => {
     return next(new AppError('no `tour` with the given ID', 404));
   }
 
-  res.status(204);
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour,
+    },
+  });
 });
 
 exports.tourStats = catchAsync(async (_req, res) => {
@@ -172,3 +177,4 @@ exports.monthlyPlan = catchAsync(async (req, res, next) => {
     },
   });
 });
+
