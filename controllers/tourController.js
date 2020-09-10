@@ -86,8 +86,6 @@ exports.updateTour = catchAsync(async (req, res, next) => {
     return next(new AppError('no `tour` with the given ID', 404));
   }
 
-  console.log('object', object);
-
   res.status(200).json({
     status: 'success',
     data: {

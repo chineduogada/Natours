@@ -65,6 +65,14 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password')) return next();
+
+  // subtract 1sec to ensure that the JWT is issued 1sec after the password has been changed
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
 // INSTANCE METHODS
 userSchema.methods.isPasswordCorrect = async (
   plainPassword,
