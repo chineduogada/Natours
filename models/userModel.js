@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const bcryptjs = require('bcryptjs');
 
@@ -41,6 +42,8 @@ const userSchema = new mongoose.Schema({
     },
   },
   passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetTokenExpiresIn: Date,
 });
 
 // MIDDLEWARES
@@ -82,6 +85,22 @@ userSchema.methods.changedPasswordAfterJWTWasIssued = function (JTWIssuedAt) {
   // False means not Change
   return false;
 };
+
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  const resetTokenHash = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  this.passwordResetToken = resetTokenHash;
+  this.passwordResetTokenExpiresIn = Date.now() + 10 * 60 * 1000;
+
+  console.log({ resetToken }, { resetTokenHash });
+
+  return resetToken;
+};
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
