@@ -5,7 +5,7 @@ const AppError = require('../utils/AppError');
 const { sendRes: JSend } = require('../utils');
 
 exports.getAllUsers = catchAsync(async (_req, res) => {
-  const users = await User.find().select('-__v');
+  const users = await User.find()
 
   res.status(200).json({
     status: 'success',
@@ -52,21 +52,49 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   })
 })
 
-exports.getUser = (_req, res) => {
-  JSend.error(res, 500, 'This route is not yet defined!');
-};
+exports.deleteMe = catchAsync(async (req, res, next) => {
+  await User.findByIdAndUpdate(req.user._id, {active: false}, {
+    new: true,
+    runValidator: true
+  });
 
-exports.createUser = (_req, res) => {
-  JSend.error(res, 500, 'This route is not yet defined!');
-};
+  res.status(204).json({
+    status: "success", 
+    data: null
+  })
+})
 
-exports.updateUser = (_req, res) => {
-  JSend.error(res, 500, 'This route is not yet defined!');
-};
+exports.getUser = catchAsync(async (req, res) => {
+  const user = await User.findById(req.params.id);
 
-exports.deleteUser = (_req, res) => {
-  JSend.error(res, 500, 'This route is not yet defined!');
-};
+  res.json({
+    user
+  })
+});
+
+// exports.createUser = (_req, res) => {
+//   JSend.error(res, 500, 'This route is not yet defined!');
+// };
+
+// exports.updateUser = (_req, res) => {
+//   JSend.error(res, 500, 'This route is not yet defined!');
+// };
+
+// exports.deleteUser = (_req, res) => {
+//   JSend.error(res, 500, 'This route is not yet defined!');
+// };
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

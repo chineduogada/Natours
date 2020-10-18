@@ -19,19 +19,29 @@ router.patch(
   authController.protect,
   userController.updateMe
 );
+router.delete(
+  '/delete-me',
+  authController.protect,
+  userController.deleteMe
+);
 
 router
   .route('/')
   .get(userController.getAllUsers)
-  .post(userController.createUser);
+  // .post(userController.createUser);
 
 router
   .route('/:id')
   .get(userController.getUser)
-  // .patch(userController.updateM)
-  .delete(userController.deleteUser);
+//   // .patch(userController.updateM)
+//   .delete(userController.deleteUser);
 
 module.exports = router;
+
+
+
+
+
 
 
 
