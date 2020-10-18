@@ -5,6 +5,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const User = require('../models/userModel');
 const sendEmail = require('../utils/sendEmail');
+const bcrypt = require('bcryptjs/dist/bcrypt');
 
 const signToken = async (id) => {
   const token = await promisify(jwt.sign)({ id }, process.env.JWT_SECRET, {
@@ -68,6 +69,9 @@ exports.login = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     token,
+    data: {
+      user: existingUser,
+    },
   });
 });
 
@@ -204,7 +208,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
    * Steps
    * 1. Get user based on the token
    * 2. If token has not expired, and there is user, set the new password
-   * 3. Update passwordChangeAt property for the user
+   * 3. Update passwordChangeAt property for the user (Automated in the `pre('save)` middleware)
    * 4. Log in the user, send JWT
    */
   // 1.
@@ -229,9 +233,6 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   existingUser.passwordCheck = req.body.passwordCheck;
   existingUser.passwordResetToken = undefined;
   existingUser.passwordResetTokenExpiresIn = undefined;
-
-  // 3.
-  // existingUser.passwordChangeAt = Date.now();
   await existingUser.save();
 
   // 4.
@@ -242,4 +243,75 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     token,
   });
 });
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  /**
+   * Steps
+   * 1. get the user form collection
+   * 2. check if the password correct
+   * 3. if so, update password
+   * 4. log uer in, send JWT
+   */
+
+  // 1.
+  const existingUser = await User.findById(req.user._id).select('+password');
+
+  // 2.
+  const isPasswordCorrect = await existingUser.isPasswordCorrect(
+    req.body.passwordCurrent,
+    existingUser.password
+  );
+  if (!isPasswordCorrect) {
+    const err = new AppError('incorrect current password!', 401);
+    return next(err);
+  }
+
+  // 3.
+  existingUser.password = req.body.password;
+  existingUser.passwordCheck = req.body.passwordCheck;
+  await existingUser.save();
+
+  // 4.
+  const token = await signToken(existingUser._id);
+  res.status(200).json({
+    status: 'success',
+    token,
+    data: {
+      user: existingUser,
+    },
+  });
+});
+
+// const test = catchAsync(async (req, res, next) => {
+//   const { passwordCurrent, passwordNew, passwordCheck } = req.body;
+
+//   // 1. Get the User
+//   const user = await User.findById(req.user._id).select("+password");
+
+//   // 2. Check for current password
+// const passwordIsCorrect =  await user.isPasswordCorrect(passwordCurrent, user.password)
+  
+  
+//   if (!passwordIsCorrect) {
+//     return next(new AppError("incorrect current password!", 400))
+//   }
+
+//   // 3. Update the new password
+//   user.password = passwordNew;
+//   user.passwordCheck = passwordCheck
+//   await user.save()
+
+//   // 4. Login the User
+//   const token = await signToken(user._id);
+
+//   res.status(200).json({
+//     status: "success",
+//     token
+//   })
+// })
+
+
+
+
+
 
