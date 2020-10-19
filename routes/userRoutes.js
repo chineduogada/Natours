@@ -25,18 +25,10 @@ router.delete(
   userController.deleteMe
 );
 
-router
-  .route('/')
-  .get(userController.getAllUsers)
-  // .post(userController.createUser);
-
-router
-  .route('/:id')
-  .get(userController.getUser)
-//   // .patch(userController.updateM)
-//   .delete(userController.deleteUser);
+router.get('/', userController.getAllUsers)
 
 module.exports = router;
+
 
 
 

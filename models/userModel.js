@@ -71,7 +71,7 @@ userSchema.pre('save', async function (next) {
 });
 
 userSchema.pre('save', function (next) {
-  if (!this.isModified('password')) return next();
+  if (!this.isModified('password') || this.isNew) return next();
 
   // subtract 1sec to ensure that the JWT is issued 1sec after the password has been changed
   this.passwordChangedAt = Date.now() - 1000;
@@ -131,6 +131,7 @@ userSchema.methods.createPasswordResetToken = function () {
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
+
 
 
 

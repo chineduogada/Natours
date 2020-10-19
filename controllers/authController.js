@@ -5,7 +5,6 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const User = require('../models/userModel');
 const sendEmail = require('../utils/sendEmail');
-const bcrypt = require('bcryptjs/dist/bcrypt');
 
 const signToken = async (id) => {
   const token = await promisify(jwt.sign)({ id }, process.env.JWT_SECRET, {
@@ -14,6 +13,37 @@ const signToken = async (id) => {
 
   return token;
 };
+
+const sendToken = async (userId, statusCode, res, user) => {
+  const token = await signToken(userId)
+  const cookieOptions = {
+    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
+    httpOnly: true
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    cookieOptions.secure = true
+  }
+
+  res.cookie('jwt', token, cookieOptions)
+  
+  if (user) {
+    user.password = undefined
+
+   return res.status(statusCode).json({
+      status: "success", 
+      token,
+      data: {
+        user
+      }
+    })
+  }
+  
+  return res.status(statusCode).json({
+    status: "success", 
+    token
+  })
+}
 
 exports.signUp = catchAsync(async (req, res) => {
   let newUser = await User.create({
@@ -32,15 +62,7 @@ exports.signUp = catchAsync(async (req, res) => {
     role: newUser.role,
   };
 
-  const token = await signToken(newUser._id);
-
-  res.status(200).json({
-    status: 'success',
-    token,
-    data: {
-      user: newUser,
-    },
-  });
+  await sendToken(newUser._id, 201, res, newUser)
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -64,18 +86,11 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(err);
   }
 
-  const token = await signToken(existingUser._id);
+    await sendToken(existingUser._id, 200, res)
 
-  res.status(200).json({
-    status: 'success',
-    token,
-    data: {
-      user: existingUser,
-    },
-  });
 });
 
-exports.protect = catchAsync(async (req, res, next) => {
+exports.protect = catchAsync(async (req, _res, next) => {
   /**
    * Checks
    * 1. get the token and check if it's there
@@ -130,7 +145,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-exports.restrictTo = (...roles) => (req, res, next) => {
+exports.restrictTo = (...roles) => (req, _res, next) => {
   console.log(req.user.role);
 
   if (!roles.includes(req.user.role)) {
@@ -236,12 +251,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   await existingUser.save();
 
   // 4.
-  const token = await signToken(existingUser._id);
+    await sendToken(existingUser, 200, res)
 
-  res.status(200).json({
-    status: 'success',
-    token,
-  });
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -272,43 +283,23 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   await existingUser.save();
 
   // 4.
-  const token = await signToken(existingUser._id);
-  res.status(200).json({
-    status: 'success',
-    token,
-    data: {
-      user: existingUser,
-    },
-  });
+  await sendToken(existingUser, 200, res)
 });
 
-// const test = catchAsync(async (req, res, next) => {
-//   const { passwordCurrent, passwordNew, passwordCheck } = req.body;
 
-//   // 1. Get the User
-//   const user = await User.findById(req.user._id).select("+password");
 
-//   // 2. Check for current password
-// const passwordIsCorrect =  await user.isPasswordCorrect(passwordCurrent, user.password)
-  
-  
-//   if (!passwordIsCorrect) {
-//     return next(new AppError("incorrect current password!", 400))
-//   }
 
-//   // 3. Update the new password
-//   user.password = passwordNew;
-//   user.passwordCheck = passwordCheck
-//   await user.save()
 
-//   // 4. Login the User
-//   const token = await signToken(user._id);
 
-//   res.status(200).json({
-//     status: "success",
-//     token
-//   })
-// })
+
+
+
+
+
+
+
+
+
 
 
 
