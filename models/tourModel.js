@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 
-module.exports = mongoose.model(
-  'Tour',
-  mongoose.Schema({
+// const User = require("./userModel") 
+
+const tourSchema = mongoose.Schema(
+  {
     name: {
       type: String,
       required: [true, `a tour must have a 'name'`],
@@ -93,9 +94,56 @@ module.exports = mongoose.model(
         description: String,
         day: Number
       }
-    ]
-  })
-);
+    ], 
+    guides: [{
+      type: mongoose.Schema.ObjectId,
+      ref: 'User'
+    }]
+  },
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  }
+)
+
+// Middlewares:
+// tourSchema.pre('save', async function (next) {
+//   const guidesPromises = this.guides.map(async (id) => await User.findById(id));
+//   const guides = await Promise.all(guidesPromises)
+
+//   this.guides = guides;
+
+//   next()
+// })
+
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt -passwordResetToken -passwordResetTokenExpiresIn'
+  });
+
+  next()
+})
+
+// Virtuals
+tourSchema.virtual('durationWeeks').get(function () {
+  return (this.duration / 7).toFixed(1);
+})
+
+const Tour = mongoose.model('Tour', tourSchema)
+
+module.exports = Tour;
+
+
+
+
+
+
+
+
+
+
+
 
 
 

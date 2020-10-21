@@ -78,18 +78,11 @@ userSchema.pre('save', function (next) {
   next();
 });
 
-const addPreFind = (type) => {
-  userSchema.pre(type || 'find', function (next) {
-    // `this` points to the current `query`
-    this.find({ active: {$ne: false } });
-    next()
-  })
-}
-
-addPreFind()
-addPreFind('findOne')
-addPreFind('findOneAndUpdate')
-addPreFind('findOneAndDelete')
+userSchema.pre(/^find/, function (next) {
+  // `this` points to the current `query`
+  this.find({ active: {$ne: false } });
+  next()
+})
 
 
 // INSTANCE METHODS
@@ -131,6 +124,7 @@ userSchema.methods.createPasswordResetToken = function () {
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
+
 
 
 

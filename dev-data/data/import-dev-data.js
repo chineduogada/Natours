@@ -7,7 +7,10 @@ const TourModel = require('../../models/tourModel');
 
 // CONNECT TO THE DB
 mongoose
-  .connect('mongodb://localhost:27017/natours')
+  .connect('mongodb://localhost:27017/natours', {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+  })
   .then(() => console.log('DB connection successful'))
   .catch((ex) => console.log(ex, 'failed to connect to the DB'));
 
@@ -48,6 +51,10 @@ if (process.argv[2] === '--import') {
   );
   process.exit();
 }
+
+
+
+
 
 
 

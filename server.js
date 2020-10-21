@@ -17,7 +17,10 @@ const app = require('./app');
 // CONNECT MONGODB
 const DB = process.env.DATABASE_LOCAL;
 
-mongoose.connect(DB).then(() => debug('successfully connected to mongodb...'));
+mongoose.connect(DB, {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+}).then(() => debug('successfully connected to mongodb...'));
 // .catch((ex) => debug(ex, "couldn't connect to mongodb"));
 
 // STARTS the SERVER
@@ -31,4 +34,7 @@ process.on('unhandledRejection', (err) => {
   console.error('UNHANDLED REJECTION: Shutting down...');
   server.close(() => process.exit(1));
 });
+
+
+
 

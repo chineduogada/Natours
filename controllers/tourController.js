@@ -46,10 +46,10 @@ exports.getTour = catchAsync(async (req, res, next) => {
   const { id } = req;
 
   // const tour = await TourModel.findOne({ _id: id });
-  const tour = await TourModel.findById(id);
+  const tour = await TourModel.findById(id)
 
   if (!tour) {
-    return next(new AppError('no `tour` with the given ID', 404));
+    return next(new AppError('no `tour` with the given `id`', 404));
   }
 
   res.status(200).json({
@@ -175,4 +175,11 @@ exports.monthlyPlan = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+
+
+
+
+
+
 
