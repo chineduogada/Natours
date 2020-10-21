@@ -1,7 +1,11 @@
 const debug = require('debug')('app:startup');
 const express = require('express');
 const morgan = require('morgan');
-const rateLimit = require('express-rate-limit')
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
+const mongoSanitize = require("express-mongo-sanitize");
+const xss = require("xss-clean");
+const hpp = require("hpp");
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
@@ -9,26 +13,47 @@ const AppError = require('./utils/AppError');
 const globalErrController = require('./controllers/errorController');
 
 // GLOBAL MIDDLEWARES
+// Set Security HTTP Headers
 const app = express();
 
 // Logging in `dev` environment
+app.use(helmet())
+
 debug(process.env.NODE_ENV);
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-// Add Rate Limiter
+// Limit requests from same API
 const limiter = rateLimit({
-  max: 3,
+  max: 100,
   windowMs: 60 * 60 * 1000
 })
 
 app.use('/api', limiter)
 
-// Body parser: make `req.body` available
-app.use(express.json());
+// Body parser: reading data from body into `req.body`
+app.use(express.json({ limit: '10kb' }));
 
-// Serve Static Content
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize())
+
+// Data sanitization against XSS
+app.use(xss());
+
+// Prevent Param pollution
+app.use(hpp({
+  whitelist: [
+    'duration',
+    'price',
+    'ratingsQuantity',
+    'ratingsAverage',
+    'maxGroupSize',
+    'difficulty',
+  ]
+}));
+
+// Serving Static files
 app.use(express.static(`${__dirname}/public`));
 
 // Test middleware
@@ -55,6 +80,30 @@ app.all('*', (req, _res, next) => {
 app.use(globalErrController);
 
 module.exports = app;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
