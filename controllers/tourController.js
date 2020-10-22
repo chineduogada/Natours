@@ -46,7 +46,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
   const { id } = req;
 
   // const tour = await TourModel.findOne({ _id: id });
-  const tour = await TourModel.findById(id)
+  const tour = await TourModel.findById(id).populate("reviews")
 
   if (!tour) {
     return next(new AppError('no `tour` with the given `id`', 404));
@@ -175,6 +175,7 @@ exports.monthlyPlan = catchAsync(async (req, res, next) => {
     },
   });
 });
+
 
 
 

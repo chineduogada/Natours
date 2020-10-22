@@ -146,8 +146,6 @@ exports.protect = catchAsync(async (req, _res, next) => {
 });
 
 exports.restrictTo = (...roles) => (req, _res, next) => {
-  console.log(req.user.role);
-
   if (!roles.includes(req.user.role)) {
     const err = new AppError('access denied! unauthorized', 403);
     return next(err);
@@ -285,6 +283,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // 4.
   await sendToken(existingUser, 200, res)
 });
+
 
 
 

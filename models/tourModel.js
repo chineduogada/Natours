@@ -127,12 +127,22 @@ tourSchema.pre(/^find/, function (next) {
 
 // Virtuals
 tourSchema.virtual('durationWeeks').get(function () {
-  return (this.duration / 7).toFixed(1);
+  return this.duration / 7;
+})
+
+// Virtual Populate
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: "tour",
+  localField: "_id"
 })
 
 const Tour = mongoose.model('Tour', tourSchema)
 
 module.exports = Tour;
+
+
+
 
 
 
