@@ -1,6 +1,11 @@
 const router = require('express').Router();
+
 const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
+const reviewController = require("../controllers/reviewController");
+const reviewRouter = require("../routes/reviewRoutes")
+
+router.use('/:tourId/reviews', reviewRouter);
 
 // ALIASES
 router.get('/top-cheap', tourController.topCheap, tourController.getAllTours);
@@ -27,5 +32,14 @@ router
     tourController.deleteTour
   );
 
+
+
+router.get("/:tourId/reviews/:id", reviewController.getReview);
+
 module.exports = router;
+
+
+
+
+
 
