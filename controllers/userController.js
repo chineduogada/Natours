@@ -21,7 +21,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   const filteredBody = filterObject(req.body, ["name", "email"])
 
   // 2. update User document
-  const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {
+  const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
     runValidator: true
   });
@@ -35,7 +35,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteMe = catchAsync(async (req, res) => {
-  await User.findByIdAndUpdate(req.user._id, { active: false }, {
+  await User.findByIdAndUpdate(req.user.id, { active: false }, {
     new: true,
     runValidator: true
   });
@@ -54,6 +54,7 @@ exports.getAllUsers = factory.getMany(User, 'users');
 exports.getUser = factory.getOne(User, 'user');
 exports.updateUser = factory.updateOne(User, 'user');
 exports.deleteUser = factory.deleteOne(User, 'user');
+
 
 
 

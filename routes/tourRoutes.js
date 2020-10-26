@@ -22,30 +22,27 @@ router.get(
 );
 
 // API ROUTES
-router
-  .route('/')
-  .get(tourController.getAllTours)
-  .post(
-    authController.protect,
-    authController.restrictTo('admin', 'lead-guide', 'guide'),
-    tourController.createTour
-  );
+router.get('/', tourController.getAllTours)
+router.get('/:id', tourController.getTour)
+
+// Protected routes
+router.use(
+  authController.protect,
+  authController.restrictTo('admin', 'lead-guide'),
+)
+
+router.post('/', tourController.createTour);
 
 router
   .route('/:id')
-  .get(tourController.getTour)
-  .patch(
-    authController.protect,
-    authController.restrictTo('admin', 'lead-guide', 'guide'),
-    tourController.updateTour
-  )
-  .delete(
-    authController.protect,
-    authController.restrictTo('admin', 'lead-guide'),
-    tourController.deleteTour
-  );
+  .patch(tourController.updateTour)
+  .delete(tourController.deleteTour);
 
 module.exports = router;
+
+
+
+
 
 
 
