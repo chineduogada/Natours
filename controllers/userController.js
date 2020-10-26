@@ -1,31 +1,9 @@
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
+const filterObject = require('../utils/filterObject');
+const factory = require("./handlerFactory");
 
-
-exports.getAllUsers = catchAsync(async (_req, res) => {
-  const users = await User.find()
-
-  res.status(200).json({
-    status: 'success',
-    count: users.length,
-    data: {
-      users,
-    },
-  });
-});
-
-const filterObj = (obj, allowedFields) =>{
-  const filteredObj = {};
-  
-  for (key in obj) {
-    if (allowedFields.includes(key)) {
-      filteredObj[key] = obj[key];
-    }
-  }
-
-  return filteredObj
- } 
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1. Throw an Error if password data is POSTed
@@ -35,7 +13,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   }
 
   // 2. Filtered unwanted fields that should be updated this way
-  const filteredBody = filterObj(req.body, ["name", "email"])
+  const filteredBody = filterObject(req.body, ["name", "email"])
 
   // 2. update User document
   const updatedUser = await User.findByIdAndUpdate(req.user._id, filteredBody, {
@@ -44,38 +22,33 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   });
 
   res.status(200).json({
-    status: "success", 
+    status: "success",
     data: {
       user: updatedUser
     }
-  })
-})
+  });
+});
 
-exports.deleteMe = catchAsync(async (req, res, next) => {
-  await User.findByIdAndUpdate(req.user._id, {active: false}, {
+exports.deleteMe = catchAsync(async (req, res) => {
+  await User.findByIdAndUpdate(req.user._id, { active: false }, {
     new: true,
     runValidator: true
   });
 
   res.status(204).json({
-    status: "success", 
+    status: "success",
     data: null
-  })
+  });
+});
+
+exports.createUser = catchAsync(async (_req, _res, next) => {
+  return next(new AppError("This route is not defined! Please use /signup instead."))
 })
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+exports.getAllUsers = factory.getMany(User, 'users');
+exports.getUser = factory.getOne(User, 'user');
+exports.updateUser = factory.updateOne(User, 'user');
+exports.deleteUser = factory.deleteOne(User, 'user');
 
 
 

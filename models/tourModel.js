@@ -51,7 +51,7 @@ const tourSchema = mongoose.Schema(
     },
     summary: {
       type: String,
-      unique: true,
+      // unique: true,
       trim: true,
       lowercase: true,
       required: [true, `a tour must have a 'summary'`],
@@ -140,6 +140,7 @@ tourSchema.virtual('reviews', {
 const Tour = mongoose.model('Tour', tourSchema)
 
 module.exports = Tour;
+
 
 
 

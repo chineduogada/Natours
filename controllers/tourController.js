@@ -1,18 +1,9 @@
-const debug = require('debug')('app:startup');
-const { API_Features } = require('../utils');
+const Tour = require('./../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/AppError');
+const factory = require("./handlerFactory");
+// const AppError = require('../utils/AppError');
 
-// MODEL
-const TourModel = require('./../models/tourModel');
-
-// MIDDLEWARES
-exports.addIdToReq = (req, _res, next, value) => {
-  req.id = value;
-  next();
-};
-
-exports.topCheap = (req, res, next) => {
+exports.topCheap = (req, _res, next) => {
   req.query.fields = 'name,ratingsAverage,price,duration';
   req.query.limit = 5;
   req.query.page = 1;
@@ -22,97 +13,15 @@ exports.topCheap = (req, res, next) => {
 };
 
 // CONTROLLERS
-exports.getAllTours = catchAsync(async (req, res, next) => {
-  const apiFeatures = new API_Features(TourModel, req.query)
-    .filter()
-    .sort()
-    .paginate()
-    .project();
+exports.getAllTours = factory.getMany(Tour, 'tours');
+exports.getTour = factory.getOne(Tour, 'tour', { path: "reviews" });
+exports.createTour = factory.createOne(Tour, 'tour');
+exports.updateTour = factory.updateOne(Tour, 'tour');
+exports.deleteTour = factory.deleteOne(Tour, 'tour');
 
-  // EXECUTE QUERY
-  const tours = await apiFeatures.query;
-
-  // SEND RESPONSE
-  res.status(200).json({
-    status: 'success',
-    result: tours.length,
-    data: {
-      tours,
-    },
-  });
-});
-
-exports.getTour = catchAsync(async (req, res, next) => {
-  const { id } = req;
-
-  // const tour = await TourModel.findOne({ _id: id });
-  const tour = await TourModel.findById(id).populate("reviews")
-
-  if (!tour) {
-    return next(new AppError('no `tour` with the given `id`', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
-});
-
-exports.createTour = catchAsync(async (req, res) => {
-  // const newTour = await new TourModel(req.body);
-  // const result = await newTour.save()
-
-  const newTour = await TourModel.create(req.body);
-
-  res.status(201).json({
-    status: 'success',
-    data: {
-      tour: newTour,
-    },
-  });
-});
-
-exports.updateTour = catchAsync(async (req, res, next) => {
-  const { id, body } = req;
-
-  const tour = await TourModel.findByIdAndUpdate(id, body, {
-    new: true,
-    runValidators: true,
-  });
-
-  if (!tour) {
-    return next(new AppError('no `tour` with the given ID', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
-});
-
-exports.deleteTour = catchAsync(async (req, res, next) => {
-  const { id } = req;
-
-  const tour = await TourModel.findByIdAndRemove(id);
-
-  if (!tour) {
-    return next(new AppError('no `tour` with the given ID', 404));
-  }
-
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour,
-    },
-  });
-});
-
+// Aggregates
 exports.tourStats = catchAsync(async (_req, res) => {
-  const stats = await TourModel.aggregate([
+  const stats = await Tour.aggregate([
     {
       $match: {
         ratingsAverage: { $gte: 4.5 },
@@ -140,9 +49,9 @@ exports.tourStats = catchAsync(async (_req, res) => {
   });
 });
 
-exports.monthlyPlan = catchAsync(async (req, res, next) => {
+exports.monthlyPlan = catchAsync(async (req, res) => {
   const year = req.params.year;
-  const plan = await TourModel.aggregate([
+  const plan = await Tour.aggregate([
     { $unwind: '$startDates' },
     {
       $match: {
@@ -175,6 +84,27 @@ exports.monthlyPlan = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

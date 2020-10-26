@@ -1,75 +1,36 @@
 const Review = require("../models/reviewModel");
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/AppError');
+const factory = require("./handlerFactory");
+// const catchAsync = require('../utils/catchAsync');
+// const AppError = require('../utils/AppError');
 
-exports.getAllReviews = catchAsync(async (req, res) => {
-  let filter = {}
+// Filter options for finding all `Reviews`
+exports.setFilterOptions = (req, _res, next) => {
+  let filterOptions = {};
   if (req.params.tourId) {
-    filter = { tour: req.params.tourId }
+    filterOptions = { tour: req.params.tourId };
   }
 
-  const reviews = await Review.find(filter);
+  req.filterOptions = filterOptions;
+  next();
+}
 
-  res.status(200).json({
-    status: "success",
-    results: reviews.length,
-    data: {
-      reviews
-    }
-  })
-})
-
-exports.getReview = catchAsync(async (req, res, next) => {
-  const review = await Review.findById(req.params.id);
-
-  if (!review) {
-    const err = new AppError("no `review` with the given `Id`.", 404);
-    return next(err);
-  }
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      review
-    }
-  })
-})
-
-exports.createReview = catchAsync(async (req, res) => {
-  // const review = await Review.create({
-  //   review: req.body.review,
-  //   rating: req.body.rating,
-  //   user: req.user._id,
-  //   tour: req.params.tourId,
-  // });
-  
-  // Allow nested routes
+exports.setTourUserIDsInReq = (req, _res, next) => {
   if (!req.body.tour) {
-    req.body.tour = req.params.tourId
+    req.body.tour = req.params.tourId;
   }
   if (!req.body.user) {
-    req.body.user = req.user._id
+    req.body.user = req.user.id;
   }
 
-  const review = await Review.create(req.body);
-
-  res.status(201).json({
-    status: "success",
-    data: {
-      review
-    }
-  })
-})
+  next();
+}
 
 
-
-
-
-
-
-
-
-
+exports.getAllReviews = factory.getMany(Review, 'reviews');
+exports.getReview = factory.getOne(Review, 'review');
+exports.createReview = factory.createOne(Review, 'review');
+exports.updateReview = factory.updateOne(Review, 'review');
+exports.deleteReview = factory.deleteOne(Review, 'review');
 
 
 
