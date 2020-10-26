@@ -11,29 +11,25 @@ router
   .get(
     reviewController.setFilterOptions,
     reviewController.getAllReviews
-  )
+    )
   .post(
-    authController.protect,
     authController.restrictTo("user"),
     reviewController.setTourUserIDsInReq,
     reviewController.createReview
   );
 
+router.get("/:id", reviewController.getReview);
+
+router.use(authController.restrictTo('admin', 'user'));
+
 router
   .route('/:id')
-  .get(reviewController.getReview)
-  .patch(
-    authController.protect,
-    authController.restrictTo("user"),
-    reviewController.updateReview
-  )
-  .delete(
-    authController.protect,
-    authController.restrictTo("user"),
-    reviewController.deleteReview
-  );
+  .patch(reviewController.updateReview)
+  .delete(reviewController.deleteReview);
 
 module.exports = router
+
+
 
 
 
