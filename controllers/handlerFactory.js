@@ -10,6 +10,7 @@ exports.getMany = (Model, docName = "document") => catchAsync(async (req, res) =
     .project();
 
   // EXECUTE QUERY
+  // const docs = await apiFeatures.query.explain();
   const docs = await apiFeatures.query;
 
   // SEND RESPONSE
@@ -86,24 +87,6 @@ exports.deleteOne = (Model, docName = "document") => catchAsync(async (req, res,
     data: null
   });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

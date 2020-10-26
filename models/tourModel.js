@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// const User = require("./userModel") 
+const slugify = require("../utils/slugify");
 
 const tourSchema = mongoose.Schema(
   {
@@ -51,10 +51,15 @@ const tourSchema = mongoose.Schema(
     },
     summary: {
       type: String,
-      // unique: true,
       trim: true,
       lowercase: true,
       required: [true, `a tour must have a 'summary'`],
+    },
+    slug: {
+      type: String,
+      default: function () {
+        return slugify(this.name);
+      }
     },
     description: {
       type: String,
@@ -76,7 +81,7 @@ const tourSchema = mongoose.Schema(
       type: {
         type: String,
         default: "Point",
-        enum:['Point']
+        enum: ['Point']
       },
       coordinates: [Number],
       address: String,
@@ -90,11 +95,11 @@ const tourSchema = mongoose.Schema(
           enum: ['Point']
         },
         coordinates: [Number],
-        address: String, 
+        address: String,
         description: String,
         day: Number
       }
-    ], 
+    ],
     guides: [{
       type: mongoose.Schema.ObjectId,
       ref: 'User'
@@ -104,7 +109,11 @@ const tourSchema = mongoose.Schema(
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   }
-)
+);
+
+// tourSchema.index({ price: 1 })
+tourSchema.index({ price: 1, ratingsAverage: -1 })
+tourSchema.index({ slug: 1 })
 
 // Middlewares:
 // tourSchema.pre('save', async function (next) {
@@ -140,6 +149,20 @@ tourSchema.virtual('reviews', {
 const Tour = mongoose.model('Tour', tourSchema)
 
 module.exports = Tour;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
