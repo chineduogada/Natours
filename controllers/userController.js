@@ -4,6 +4,11 @@ const AppError = require('../utils/AppError');
 const filterObject = require('../utils/filterObject');
 const factory = require("./handlerFactory");
 
+exports.getMe = catchAsync(async (req, _res, next) => {
+  req.params.id = req.user.id;
+
+  next();
+})
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1. Throw an Error if password data is POSTed
@@ -49,6 +54,10 @@ exports.getAllUsers = factory.getMany(User, 'users');
 exports.getUser = factory.getOne(User, 'user');
 exports.updateUser = factory.updateOne(User, 'user');
 exports.deleteUser = factory.deleteOne(User, 'user');
+
+
+
+
 
 
 
