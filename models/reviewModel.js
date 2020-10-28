@@ -1,4 +1,7 @@
 const mongoose = require("mongoose");
+const Tour = require("./tourModel");
+const AppError = require("../utils/AppError");
+const { any } = require("joi");
 
 const reviewSchema = mongoose.Schema({
   review: {
@@ -44,11 +47,92 @@ reviewSchema.pre(/^find/, function (next) {
   })
 
   next()
-})
+});
 
-const Review = mongoose.model('Review', reviewSchema)
+reviewSchema.statics.calcAverageRatings = async function (tourId) {
+  const stats = await this.aggregate([
+    {
+      $match: { tour: tourId },
+    },
+    {
+      $group: {
+        _id: null,
+        nRating: { $sum: 1 },
+        avgRating: { $avg: "$rating" }
+      }
+    }
+  ]);
 
-module.exports = Review
+  if (stats.length) {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: stats[0].nRating,
+      ratingsAverage: stats[0].avgRating
+    });
+  } else {
+    await Tour.findByIdAndUpdate(tourId, {
+      ratingsQuantity: 0,
+      ratingsAverage: 4.5
+    });
+  }
+}
+
+reviewSchema.post("save", async function () {
+  const review = this;
+
+  await review.constructor.calcAverageRatings(review.tour);
+});
+
+reviewSchema.pre(/^findOneAnd/, async function (next) {
+  /// We can use `this.findOne`:(returns the doc), here in `pre`
+  // And we don't need the `doc` here because is hasn't been persisted to the DB just yet!
+  // we need the `doc` no matter what in this `post middleware`
+  // set it on the `this` to pass to the `post middleware`
+
+  this.review = await this.findOne(); // `this.review` will be available in the `post middleware`;
+  
+  next();
+});
+
+reviewSchema.post(/^findOneAnd/, async function () {
+  //   // We can't use `this.findOne`:(returns thw doc): deprecation warning
+  //   // And we need the `doc` no matter what in this `post middleware`
+  //   // Because we are dealing with `static` method (for constructors):(doc.constructor && doc.tour)
+  
+  const { review } = this;
+
+  review.constructor.calcAverageRatings(review.tour);
+});
+
+const Review = mongoose.model('Review', reviewSchema);
+
+module.exports = Review;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

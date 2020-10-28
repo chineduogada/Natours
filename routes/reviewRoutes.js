@@ -1,6 +1,8 @@
 const express = require("express");
+
 const reviewController = require("../controllers/reviewController");
 const authController = require("../controllers/authController");
+const unsetFields = require("../utils/unsetFields")
 
 const router = express.Router({ mergeParams: true })
 
@@ -24,10 +26,23 @@ router.use(authController.restrictTo('admin', 'user'));
 
 router
   .route('/:id')
-  .patch(reviewController.updateReview)
+  .patch(
+    unsetFields("tour", "user"),
+    reviewController.updateReview
+  )
   .delete(reviewController.deleteReview);
 
 module.exports = router
+
+
+
+
+
+
+
+
+
+
 
 
 

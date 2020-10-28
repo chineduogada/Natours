@@ -12,16 +12,16 @@ process.on('uncaughtException', (err) => {
 
 const app = require('./app');
 
-// debug(process.env);
-
 // CONNECT MONGODB
 const DB = process.env.DATABASE_LOCAL;
 
 mongoose.connect(DB, {
   useNewUrlParser: true,
   useCreateIndex: true,
-}).then(() => debug('successfully connected to mongodb...'));
-// .catch((ex) => debug(ex, "couldn't connect to mongodb"));
+  useFindAndModify: false
+})
+  .then(() => debug('successfully connected to mongodb...'))
+  .catch((ex) => debug(ex, "couldn't connect to mongodb"));
 
 // STARTS the SERVER
 const port = process.env.PORT || 8000;
@@ -31,9 +31,13 @@ const server = app.listen(port, '127.0.0.1', () =>
 
 process.on('unhandledRejection', (err) => {
   console.error(err.stack, err.name, err.message);
+  
   console.error('UNHANDLED REJECTION: Shutting down...');
   server.close(() => process.exit(1));
 });
+
+
+
 
 
 

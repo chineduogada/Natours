@@ -34,6 +34,7 @@ const tourSchema = mongoose.Schema(
       default: 4.5,
       min: [1, `'ratingsAverage' must be equal or more than '1.0'`],
       max: [5, `'ratingsAverage' must be equal or less than '5.0'`],
+      set: val => (Math.round(val * 10) / 10)
     },
     ratingsQuantity: {
       type: Number,
@@ -149,6 +150,11 @@ tourSchema.virtual('reviews', {
 const Tour = mongoose.model('Tour', tourSchema)
 
 module.exports = Tour;
+
+
+
+
+
 
 
 
