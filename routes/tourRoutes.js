@@ -21,6 +21,12 @@ router.get(
   tourController.monthlyPlan
 );
 
+// Geo-spatial Routes
+router.get("/within/:distance/center/:latlng/unit/:unit", tourController.getToursWithin);
+// /within/:distance/center/:latlng/unit/:unit
+// /within/300/center/34.241828,-118.660343/unit/mi
+router.get("/distances/:latlng/unit/:unit", tourController.getTourDistances);
+
 // API ROUTES
 router.get('/', tourController.getAllTours)
 router.get('/:id', tourController.getTour)
@@ -39,6 +45,13 @@ router
   .delete(tourController.deleteTour);
 
 module.exports = router;
+
+
+
+
+
+
+
 
 
 

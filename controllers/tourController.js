@@ -1,6 +1,7 @@
 const Tour = require('./../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
 const factory = require("./handlerFactory");
+const AppError = require('../utils/AppError');
 // const AppError = require('../utils/AppError');
 
 exports.topCheap = (req, _res, next) => {
@@ -84,6 +85,111 @@ exports.monthlyPlan = catchAsync(async (req, res) => {
     },
   });
 });
+
+// /within/300/center/34.241828, -118.660343/unit/mi
+exports.getToursWithin = catchAsync(async (req, res, next) => {
+  const { distance, latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(",");
+
+  const earthRadius = unit === "mi" ? 3958.8 : 6371;
+  const radians = distance / earthRadius
+
+  if (!lat || !lng) {
+    return next(new AppError("Wrong param format! has to be .../center/lat,lng/...", 400))
+  }
+
+  const tours = await Tour.find({
+    startLocation: {
+      $geoWithin: {
+        $centerSphere: [[lng, lat], radians]
+      }
+    }
+  });
+
+  res.status(200).json({
+    status: "success",
+    results: tours.length,
+    data: {
+      tours
+    }
+  })
+});
+
+exports.getTourDistances = catchAsync(async (req, res, next) => {
+
+  const { latlng, unit } = req.params;
+  const [lat, lng] = latlng.split(",");
+
+  const multiplier = unit === "mi" ? 0.000621371 : 0.001;
+
+  if (!lat || !lng) {
+    return next(new AppError("Wrong param format! has to be .../center/lat,lng/...", 400))
+  }
+
+  const distances = await Tour.aggregate([
+    {
+      $geoNear: {
+        near: {
+          type: "Point",
+          coordinates: [lng * 1, lat * 1]
+        },
+        distanceField: "distance",
+        distanceMultiplier: multiplier
+      }
+    },
+    {
+      $project: { distance: 1, name: 1 }
+    }
+  ]);
+
+  res.status(200).json({
+    status: "success",
+    results: distances.length,
+    data: {
+      distances
+    }
+  })
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

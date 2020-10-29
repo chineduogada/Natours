@@ -113,8 +113,9 @@ const tourSchema = mongoose.Schema(
 );
 
 // tourSchema.index({ price: 1 })
-tourSchema.index({ price: 1, ratingsAverage: -1 })
-tourSchema.index({ slug: 1 })
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' });
 
 // Middlewares:
 // tourSchema.pre('save', async function (next) {
@@ -150,6 +151,10 @@ tourSchema.virtual('reviews', {
 const Tour = mongoose.model('Tour', tourSchema)
 
 module.exports = Tour;
+
+
+
+
 
 
 
