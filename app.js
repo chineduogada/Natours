@@ -1,3 +1,4 @@
+const path = require("path");
 const debug = require('debug')('app:startup');
 const express = require('express');
 const morgan = require('morgan');
@@ -13,13 +14,19 @@ const reviewRouter = require('./routes/reviewRoutes');
 const AppError = require('./utils/AppError');
 const globalErrController = require('./controllers/errorController');
 
-// GLOBAL MIDDLEWARES
-// Set Security HTTP Headers
 const app = express();
 
-// Logging in `dev` environment
+app.set("view engine", 'pug')
+app.set('views', path.join(__dirname, 'views'))
+
+// GLOBAL MIDDLEWARES
+// Serving Static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Set Security HTTP Headers
 app.use(helmet())
 
+// Logging in `dev` environment
 debug(process.env.NODE_ENV);
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -54,8 +61,6 @@ app.use(hpp({
   ]
 }));
 
-// Serving Static files
-app.use(express.static(`${__dirname}/public`));
 
 // Test middleware
 app.use((req, _res, next) => {
@@ -64,6 +69,10 @@ app.use((req, _res, next) => {
 });
 
 // ROUTES
+app.get("/", (req, res) => {
+  res.status(200).render('index');
+})
+
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
@@ -82,6 +91,14 @@ app.all('*', (req, _res, next) => {
 app.use(globalErrController);
 
 module.exports = app;
+
+
+
+
+
+
+
+
 
 
 
