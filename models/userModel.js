@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const bcryptjs = require('bcryptjs');
+const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -9,10 +10,7 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    match: [
-      /([a-z0-9\-]+)@([a-z0-9]+)\.([a-z]{2,8})(\.[a-z]{2,8})?/i,
-      'please provide a valid email address',
-    ],
+    validate: [validator.isEmail, 'please provide a valid email address'],
     required: [true, 'please provide your email'],
     unique: true,
     lowercase: true,
@@ -44,7 +42,7 @@ const userSchema = new mongoose.Schema({
   active: {
     type: Boolean,
     select: false,
-    default: true
+    default: true,
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
@@ -80,10 +78,9 @@ userSchema.pre('save', function (next) {
 
 userSchema.pre(/^find/, function (next) {
   // `this` points to the current `query`
-  this.find({ active: {$ne: false } });
-  next()
-})
-
+  this.find({ active: { $ne: false } });
+  next();
+});
 
 // INSTANCE METHODS
 userSchema.methods.isPasswordCorrect = async (
@@ -124,32 +121,4 @@ userSchema.methods.createPasswordResetToken = function () {
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -3,12 +3,12 @@
 }
 
 ::-moz-selection {
-  background-color: #55c57a;
+  background-color: #44b56a;
   color: #fff;
 }
 
 ::selection {
-  background-color: #55c57a;
+  background-color: #44b56a;
   color: #fff;
 }
 
@@ -299,9 +299,9 @@ body {
 }
 
 .header {
-  background-color: #444;
-  padding: 0 5rem;
-  height: 8rem;
+  background-color: #555;
+  padding: 2rem 5rem;
+  min-height: 8rem;
   position: relative;
   z-index: 100;
   display: -webkit-box;
@@ -605,8 +605,8 @@ body {
   grid-column-gap: 6rem;
   grid-auto-flow: column;
   overflow-x: scroll;
-  -ms-scroll-snap-type: x mandatory;
-  scroll-snap-type: x mandatory;
+  -ms-scroll-snap-type: x proximity;
+  scroll-snap-type: x proximity;
 }
 .reviews__card {
   width: 30rem;

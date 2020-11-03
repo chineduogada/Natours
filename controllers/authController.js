@@ -15,35 +15,37 @@ const signToken = async (id) => {
 };
 
 const sendToken = async (userId, statusCode, res, user) => {
-  const token = await signToken(userId)
+  const token = await signToken(userId);
   const cookieOptions = {
-    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
-    httpOnly: true
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+
+  if (process.env.NODE_ENV === 'production') {
+    cookieOptions.secure = true;
   }
 
-  if (process.env.NODE_ENV === "production") {
-    cookieOptions.secure = true
-  }
+  res.cookie('jwt', token, cookieOptions);
 
-  res.cookie('jwt', token, cookieOptions)
-  
   if (user) {
-    user.password = undefined
+    user.password = undefined;
 
-   return res.status(statusCode).json({
-      status: "success", 
+    return res.status(statusCode).json({
+      status: 'success',
       token,
       data: {
-        user
-      }
-    })
+        user,
+      },
+    });
   }
-  
+
   return res.status(statusCode).json({
-    status: "success", 
-    token
-  })
-}
+    status: 'success',
+    token,
+  });
+};
 
 exports.signUp = catchAsync(async (req, res) => {
   let newUser = await User.create({
@@ -62,7 +64,7 @@ exports.signUp = catchAsync(async (req, res) => {
     role: newUser.role,
   };
 
-  await sendToken(newUser._id, 201, res, newUser)
+  await sendToken(newUser._id, 201, res, newUser);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -86,11 +88,64 @@ exports.login = catchAsync(async (req, res, next) => {
     return next(err);
   }
 
-    await sendToken(existingUser._id, 200, res)
-
+  await sendToken(existingUser._id, 200, res);
 });
 
-exports.protect = catchAsync(async (req, _res, next) => {
+exports.logout = catchAsync(async (req, res, next) => {
+  res.cookie('jwt', 'logged out', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+
+  res.status(200).json({
+    status: 'success',
+  });
+});
+
+// Only for rendered pages and there will be no Errors
+exports.isLoggedIn = async (req, res, next) => {
+  /**
+   * Checks
+   * 1 validate the token
+   * 2. if the user is not deleted
+   * 3. if the user changed password after the token was issued
+   */
+
+  try {
+    if (req.cookies.jwt) {
+      // 1.
+      const decoded = await promisify(jwt.verify)(
+        req.cookies.jwt,
+        process.env.JWT_SECRET
+      );
+
+      // 2.
+      const existingUser = await User.findById(decoded.id);
+      if (!existingUser) {
+        return next();
+      }
+
+      // 3.
+      const changedPasswordAfterJWTWasIssued = existingUser.changedPasswordAfterJWTWasIssued(
+        decoded.iat
+      );
+
+      if (changedPasswordAfterJWTWasIssued) {
+        return next();
+      }
+
+      // GRANT ACCESS TO THE PUG Template
+      res.locals.user = existingUser;
+      return next();
+    }
+  } catch (err) {
+    return next();
+  }
+
+  next();
+};
+
+exports.protect = catchAsync(async (req, res, next) => {
   /**
    * Checks
    * 1. get the token and check if it's there
@@ -104,6 +159,8 @@ exports.protect = catchAsync(async (req, _res, next) => {
   let token;
   if (authorization && authorization.startsWith('Bearer')) {
     token = authorization.split(' ')[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token) {
@@ -142,12 +199,16 @@ exports.protect = catchAsync(async (req, _res, next) => {
 
   // GRANT ACCESS TO THE PROTECTED ROUTE
   req.user = existingUser;
+  res.locals.user = existingUser;
   next();
 });
 
 exports.restrictTo = (...roles) => (req, _res, next) => {
   if (!roles.includes(req.user.role)) {
-    const err = new AppError('access denied! `unauthorized`: You don\'t permission to perform this action.', 403);
+    const err = new AppError(
+      "access denied! `unauthorized`: You don't permission to perform this action.",
+      403
+    );
     return next(err);
   }
 
@@ -249,8 +310,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   await existingUser.save();
 
   // 4.
-    await sendToken(existingUser, 200, res)
-
+  await sendToken(existingUser, 200, res);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -263,7 +323,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
    */
 
   // 1.
-  const existingUser = await User.findById(req.user._id).select('+password');
+  const existingUser = await User.findById(req.user.id).select('+password');
 
   // 2.
   const isPasswordCorrect = await existingUser.isPasswordCorrect(
@@ -278,9 +338,9 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   // 3.
   existingUser.password = req.body.password;
   existingUser.passwordCheck = req.body.passwordCheck;
-  await existingUser.save();
+  await existingUser.save({ validateModifiedOnly: true });
 
   // 4.
-  await sendToken(existingUser, 200, res)
+  await sendToken(existingUser, 200, res);
 });
 

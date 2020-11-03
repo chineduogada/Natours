@@ -5,11 +5,15 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon server.js",
-    "start:prod": "SET NODE_ENV=production && nodemon server.js"
+    "start:prod": "SET NODE_ENV=production && nodemon server.js",
+    "watch:js": "parcel watch ./public/js/index.js --out-dir ./public/js --out-file bundle.js",
+    "build:js": "parcel ./public/js/index.js --out-dir ./public/js --out-file bundle.js"
   },
   "author": "stanley chinedu ogada",
   "license": "ISC",
   "dependencies": {
+    "@babel/polyfill": "^7.12.1",
+    "axios": "^0.21.0",
     "bcryptjs": "^2.4.3",
     "config": "^3.3.1",
     "cookie-parser": "^1.4.5",
@@ -26,6 +30,10 @@
     "morgan": "^1.10.0",
     "nodemailer": "^6.4.11",
     "pug": "^3.0.0",
+    "validator": "^13.1.17",
     "xss-clean": "^0.1.1"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.3"
   }
 }
