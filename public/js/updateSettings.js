@@ -1,18 +1,14 @@
 import axios from 'axios';
 import { showAlert } from './alerts';
-import { logout } from './login';
 
-export const updateUserData = async (name, email) => {
+export const updateUserData = async (data) => {
   try {
     const {
       data: { status },
     } = await axios({
       method: 'PATCH',
       url: 'http://127.0.0.1:4000/api/v1/users/update-me',
-      data: {
-        name,
-        email,
-      },
+      data,
     });
 
     if (status === 'success') {
@@ -52,4 +48,5 @@ export const updateUserPassword = async (
     showAlert('error', message);
   }
 };
+
 

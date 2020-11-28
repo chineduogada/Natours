@@ -30,7 +30,7 @@ block content
         .user-view__form-container
           h2.heading-secondary.ma-bt-md Your account settings
           //- Without API
-          //- form.form.form-user-data(action="/submit-user-data" method="POST")
+          //- form.form.form-user-data(action="/submit-user-data" method="POST" enctype='multipart/form-data')
           //- With API
           form.form.form-user-data
             .form__group
@@ -38,10 +38,15 @@ block content
               input#name.form__input(type='text', value=`${user.name}`, required, name="name")
             .form__group.ma-bt-md
               label.form__label(for='email') Email address
-              input#email.form__input(type='email', value=`${user.email}`, required, name="email")
+              input#email.form__input(type="email" value=`${user.email}`, required, name="email")
             .form__group.form__photo-upload
               img.form__user-photo(src=`img/users/${user.photo}`, alt=`Photo of ${user.name}`)
-              a.btn-text(href='#') Choose new photo
+              
+              
+              input#photo.form__upload(type="file" accept="image/*", name='photo' )
+              label(for='photo') Upload new photo
+
+
             .form__group.right
               button.btn.btn--small.btn--green Save settings
 

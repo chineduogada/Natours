@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const slugify = require("../utils/slugify");
+const slugify = require('../utils/slugify');
 
 const tourSchema = mongoose.Schema(
   {
@@ -34,7 +34,7 @@ const tourSchema = mongoose.Schema(
       default: 4.5,
       min: [1, `'ratingsAverage' must be equal or more than '1.0'`],
       max: [5, `'ratingsAverage' must be equal or less than '5.0'`],
-      set: val => (Math.round(val * 10) / 10)
+      set: (val) => Math.round(val * 10) / 10,
     },
     ratingsQuantity: {
       type: Number,
@@ -60,7 +60,7 @@ const tourSchema = mongoose.Schema(
       type: String,
       default: function () {
         return slugify(this.name);
-      }
+      },
     },
     description: {
       type: String,
@@ -81,30 +81,32 @@ const tourSchema = mongoose.Schema(
       // GeoJSON
       type: {
         type: String,
-        default: "Point",
-        enum: ['Point']
+        default: 'Point',
+        enum: ['Point'],
       },
       coordinates: [Number],
       address: String,
-      description: String
+      description: String,
     },
     locations: [
       {
         type: {
           type: String,
           default: 'Point',
-          enum: ['Point']
+          enum: ['Point'],
         },
         coordinates: [Number],
         address: String,
         description: String,
-        day: Number
-      }
+        day: Number,
+      },
     ],
-    guides: [{
-      type: mongoose.Schema.ObjectId,
-      ref: 'User'
-    }]
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },
@@ -130,69 +132,26 @@ tourSchema.index({ startLocation: '2dsphere' });
 tourSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'guides',
-    select: '-__v -passwordChangedAt -passwordResetToken -passwordResetTokenExpiresIn'
+    select:
+      '-__v -passwordChangedAt -passwordResetToken -passwordResetTokenExpiresIn',
   });
 
-  next()
-})
+  next();
+});
 
 // Virtuals
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
-})
+});
 
 // Virtual Populate
 tourSchema.virtual('reviews', {
   ref: 'Review',
-  foreignField: "tour",
-  localField: "_id"
-})
+  foreignField: 'tour',
+  localField: '_id',
+});
 
-const Tour = mongoose.model('Tour', tourSchema)
+const Tour = mongoose.model('Tour', tourSchema);
 
 module.exports = Tour;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -1,76 +1,112 @@
+const multer = require('multer');
+const sharp = require('sharp');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const filterObject = require('../utils/filterObject');
-const factory = require("./handlerFactory");
+const factory = require('./handlerFactory');
+
+// const multerStorage = multer.diskStorage({
+//   destination: (_req, _file, cb) => {
+//     cb(null, 'public/img/users');
+//   },
+//   filename: (req, file, cb) => {
+//     const ext = file.mimetype.split('/')[1];
+//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+//   },
+// });
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (_req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload only images.', 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+exports.uploadPhoto = upload.single('photo');
+
+exports.resizeUserPhoto = (req, _res, next) => {
+  if (!req.file) return next();
+
+  req.file.filename = `user-${req.user.id}.jpeg`;
+
+  sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/users/${req.file.filename}`);
+
+  next();
+};
 
 exports.getMe = catchAsync(async (req, _res, next) => {
   req.params.id = req.user.id;
 
   next();
-})
+});
 
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1. Throw an Error if password data is POSTed
   if (req.body.password || req.body.passwordCheck) {
-    const err = new AppError('This route is not for Password updates. Please use `/updateMyPassword`.', 400);
-    return next(err)
+    const err = new AppError(
+      'This route is not for Password updates. Please use `/updateMyPassword`.',
+      400
+    );
+    return next(err);
   }
 
   // 2. Filtered unwanted fields that should be updated this way
-  const filteredBody = filterObject(req.body, ["name", "email"])
+  const filteredBody = filterObject(req.body, ['name', 'email']);
+  if (req.file) {
+    filteredBody.photo = req.file.filename;
+  }
 
   // 2. update User document
   const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
-    runValidator: true
+    runValidator: true,
   });
 
   res.status(200).json({
-    status: "success",
+    status: 'success',
     data: {
-      user: updatedUser
-    }
+      user: updatedUser,
+    },
   });
 });
 
 exports.deleteMe = catchAsync(async (req, res) => {
-  await User.findByIdAndUpdate(req.user.id, { active: false }, {
-    new: true,
-    runValidator: true
-  });
+  await User.findByIdAndUpdate(
+    req.user.id,
+    { active: false },
+    {
+      new: true,
+      runValidator: true,
+    }
+  );
 
   res.status(204).json({
-    status: "success",
-    data: null
+    status: 'success',
+    data: null,
   });
 });
 
 exports.createUser = catchAsync(async (_req, _res, next) => {
-  return next(new AppError("This route is not defined! Please use /signup instead."))
-})
+  return next(
+    new AppError('This route is not defined! Please use /signup instead.')
+  );
+});
 
 exports.getAllUsers = factory.getMany(User, 'users');
 exports.getUser = factory.getOne(User, 'user');
 exports.updateUser = factory.updateOne(User, 'user');
 exports.deleteUser = factory.deleteOne(User, 'user');
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

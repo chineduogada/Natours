@@ -8567,8 +8567,6 @@ var _axios = _interopRequireDefault(require("axios"));
 
 var _alerts = require("./alerts");
 
-var _login = require("./login");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -8580,7 +8578,7 @@ var updateUserData =
 function () {
   var _ref = _asyncToGenerator(
   /*#__PURE__*/
-  regeneratorRuntime.mark(function _callee(name, email) {
+  regeneratorRuntime.mark(function _callee(data) {
     var _ref2, status, message;
 
     return regeneratorRuntime.wrap(function _callee$(_context) {
@@ -8592,10 +8590,7 @@ function () {
             return (0, _axios.default)({
               method: 'PATCH',
               url: 'http://127.0.0.1:4000/api/v1/users/update-me',
-              data: {
-                name: name,
-                email: email
-              }
+              data: data
             });
 
           case 3:
@@ -8623,7 +8618,7 @@ function () {
     }, _callee, null, [[0, 8]]);
   }));
 
-  return function updateUserData(_x, _x2) {
+  return function updateUserData(_x) {
     return _ref.apply(this, arguments);
   };
 }();
@@ -8680,13 +8675,13 @@ function () {
     }, _callee2, null, [[1, 9]]);
   }));
 
-  return function updateUserPassword(_x3, _x4, _x5) {
+  return function updateUserPassword(_x2, _x3, _x4) {
     return _ref3.apply(this, arguments);
   };
 }();
 
 exports.updateUserPassword = updateUserPassword;
-},{"axios":"../../node_modules/axios/index.js","./alerts":"alerts.js","./login":"login.js"}],"index.js":[function(require,module,exports) {
+},{"axios":"../../node_modules/axios/index.js","./alerts":"alerts.js"}],"index.js":[function(require,module,exports) {
 "use strict";
 
 require("core-js/modules/es6.array.copy-within");
@@ -8996,7 +8991,21 @@ if (userData_form) {
         name_input = _userData_form$queryS2[0],
         email_input = _userData_form$queryS2[1];
 
-    (0, _updateSettings.updateUserData)(name_input.value, email_input.value);
+    var upload_input = userData_form.querySelector('.form__upload');
+    var form = new FormData();
+    form.append('name', name_input.value);
+    form.append('email', email_input.value);
+    form.append('photo', upload_input.files[0]);
+    (0, _updateSettings.updateUserData)(form); // const form = {
+    //   name: name_input.value,
+    //   email: email_input.value,
+    // };
+    // const formData = new FormData();
+    // for (const field in form) {
+    //   formData.append(field, form[field]);
+    // }
+    // formData.append('photo', upload_input.files[0]);
+    // updateUserData(formData);
   });
 }
 
@@ -9041,7 +9050,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "7153" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "7094" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

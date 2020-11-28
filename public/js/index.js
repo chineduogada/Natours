@@ -41,8 +41,28 @@ if (userData_form) {
     const [name_input, email_input] = userData_form.querySelectorAll(
       '.form__input'
     );
+    const upload_input = userData_form.querySelector('.form__upload');
 
-    updateUserData(name_input.value, email_input.value);
+    const form = new FormData();
+    form.append('name', name_input.value);
+    form.append('email', email_input.value);
+    form.append('photo', upload_input.files[0]);
+
+    updateUserData(form);
+
+    // const form = {
+    //   name: name_input.value,
+    //   email: email_input.value,
+    // };
+
+    // const formData = new FormData();
+
+    // for (const field in form) {
+    //   formData.append(field, form[field]);
+    // }
+    // formData.append('photo', upload_input.files[0]);
+
+    // updateUserData(formData);
   });
 }
 
